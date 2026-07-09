@@ -27,7 +27,10 @@ function initTabs() {
             // နှိပ်လိုက်သော Tab ကို Active လုပ်ရန်
             button.classList.add('active');
             const targetView = button.getAttribute('data-target');
-            document.getElementById(targetView).classList.remove('hidden');
+            const viewElement = document.getElementById(targetView);
+            if (viewElement) {
+                viewElement.classList.remove('hidden');
+            }
         });
     });
 }
@@ -37,12 +40,14 @@ function initTabs() {
    ========================================================================== */
 function initCalendar() {
     const calendarStrip = document.getElementById('calendar-strip');
+    if (!calendarStrip) return;
+    
     const daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const today = new Date();
     
     calendarStrip.innerHTML = '';
     
-    // ယနေ့အပါအဝင် ရှေ့/နောက် ရက်အချို့ကို တွက်ချက်ပြသရန်
+    // ယနေ့အပါအဝင် ရှေ့ ၃ ရက်၊ နောက် ၃ ရက်ကို တွက်ချက်ပြသရန်
     for (let i = -3; i <= 3; i++) {
         const currentDay = new Date();
         currentDay.setDate(today.getDate() + i);
@@ -67,8 +72,18 @@ function initCalendar() {
 async function loadDashboardData() {
     if (loadingEl) loadingEl.classList.remove('hidden');
     
-    // Supabase မှ Data ရယူခြင်း
-    appMedicines = await dbFetchMedicines();
+    try {
+        // Supabase မှ Data ရယူခြင်း (dbFetchMedicines ဖိုင်သည် supabase-db.js ထဲမှဖြစ်သည်)
+        if (typeof dbFetchMedicines === 'function') {
+            appMedicines = await dbFetchMedicines();
+        } else {
+            console.error("dbFetchMedicines function မရှိသေးပါ");
+            appMedicines = [];
+        }
+    } catch (error) {
+        console.error("Data loading error:", error);
+        appMedicines = [];
+    }
     
     if (loadingEl) loadingEl.classList.add('hidden');
     
@@ -77,25 +92,29 @@ async function loadDashboardData() {
 }
 
 function renderMedicines(medicines) {
+    if (!medicineGrid) return;
     medicineGrid.innerHTML = '';
     
-    if (medicines.length === 0) {
-        medicineGrid.innerHTML = `<p class="loading-state">ဆေးစာရင်း မရှိသေးပါဗျာ။</p>`;
+    if (!medicines || medicines.length === 0) {
+        medicineGrid.innerHTML = `<p class="loading-state">ဆေးစာရင်း မရှိသေးပါဗျာ။ (Supabase ထဲတွင် row ထည့်ပေးရန် လိုအပ်ပါသည်)</p>`;
         return;
     }
     
     medicines.forEach(med => {
-        // စုစုပေါင်း လက်ကျန် သုည ဖြစ်နေပါက ကတ်ပြားကို မှေးမှိန် (Out of stock) လုပ်ရန်
-        const isOut = (med.box_count + med.card_count + med.unit_count) === 0;
-        const cardClass = isOut ? 'med-card out-of-stock shadow-soft' : 'med-card shadow-soft';
+        // လက်ကျန် သုည ဖြစ်နေပါက ကတ်ပြားကို မှေးမှိန် (Out of stock) လုပ်ရန်
+        const box = med.box_count || 0;
+        const card = med.card_count || 0;
+        const unit = med.unit_count || 0;
+        const isOut = (box + card + unit) === 0;
+        const cardClass = isOut ? 'med-card out-of-stock shadow-soft' : 'med-card shadow-soft'; /* */
         
-        // Default Placeholder Img သုံးရန်၊ URL ရှိပါက ၎င်းကိုသုံးရန်
+        // Placeholder Img သုံးရန်၊ URL ရှိပါက ၎င်းကိုသုံးရန်
         const imgUrl = med.image_url || 'assets/images/placeholder.png';
         
         const cardHtml = `
             <div class="${cardClass}">
                 <div class="med-img-wrapper">
-                    <img src="${imgUrl}" alt="${med.name}">
+                    <img src="${imgUrl}" alt="${med.name}" onerror="this.src='assets/images/placeholder.png'">
                 </div>
                 
                 <div class="med-info">
@@ -103,27 +122,27 @@ function renderMedicines(medicines) {
                     <p class="med-brand">${med.brand || 'General'}</p>
                     
                     <div class="units-container">
-                        <span class="unit-badge">📦 ဗူး: ${med.box_count || 0}</span>
-                        <span class="unit-badge">🃏 ကဒ်: ${med.card_count || 0}</span>
-                        <span class="unit-badge">💊 လုံး: ${med.unit_count || 0}</span>
+                        <span class="unit-badge">📦 ဗူး: ${box}</span>
+                        <span class="unit-badge">🃏 ကဒ်: ${card}</span>
+                        <span class="unit-badge">💊 လုံး: ${unit}</span>
                     </div>
                 </div>
                 
                 <div class="controls-wrapper">
                     <div style="display:flex; gap:4px; align-items:center;">
-                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'box_count', ${med.box_count || 0}, -1)">-</button>
+                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'box_count', ${box}, -1)">-</button>
                         <span style="font-size:0.75rem; font-weight:600; width:30px; text-align:center;">ဗူး</span>
-                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'box_count', ${med.box_count || 0}, 1)">+</button>
+                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'box_count', ${box}, 1)">+</button>
                     </div>
                     <div style="display:flex; gap:4px; align-items:center;">
-                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'card_count', ${med.card_count || 0}, -1)">-</button>
+                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'card_count', ${card}, -1)">-</button>
                         <span style="font-size:0.75rem; font-weight:600; width:30px; text-align:center;">ကဒ်</span>
-                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'card_count', ${med.card_count || 0}, 1)">+</button>
+                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'card_count', ${card}, 1)">+</button>
                     </div>
                     <div style="display:flex; gap:4px; align-items:center;">
-                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'unit_count', ${med.unit_count || 0}, -1)">-</button>
+                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'unit_count', ${unit}, -1)">-</button>
                         <span style="font-size:0.75rem; font-weight:600; width:30px; text-align:center;">လုံး</span>
-                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'unit_count', ${med.unit_count || 0}, 1)">+</button>
+                        <button class="btn-ctrl" onclick="changeStock(${med.id}, 'unit_count', ${unit}, 1)">+</button>
                     </div>
                 </div>
             </div>
@@ -132,22 +151,22 @@ function renderMedicines(medicines) {
     });
 }
 
-// ခလုတ်နှိပ်လိုက်လျှင် ဒေတာဘေ့စ်တွင် သွားရောက်တိုး/လျှော့ပေးမည့် ပင်မလုပ်ဆောင်ချက်
+// ခလုတ်နှိပ်လျှင် ဒေတာဘေ့စ်တွင် သွားရောက်တိုး/လျှော့ပေးမည့် ပင်မလုပ်ဆောင်ချက်
 async function changeStock(id, field, currentVal, step) {
-    const newVal = currentVal + step;
-    const success = await dbUpdateStock(id, field, newVal);
-    if (success) {
-        // ဒေတာကို ပြန်လည်မောင်းနှင်ပြသခြင်း
-        loadDashboardData();
+    if (typeof dbUpdateStock === 'function') {
+        const newVal = currentVal + step;
+        const success = await dbUpdateStock(id, field, newVal);
+        if (success) {
+            loadDashboardData();
+        }
     }
 }
 
 /* ==========================================================================
-   4. Calculations & Summaries (ငွေပမာဏ 💰 နှင့် မိနစ် ⏱️ စုစုပေါင်းတွက်ချက်ခြင်း)
+   4. Calculations & Summaries (Dashboard အနှစ်ချုပ် တွက်ချက်ခြင်း)
    ========================================================================== */
 function calculateSummary() {
-    // ဤနေရာတွင် လက်ရှိနေ့အလိုက် စုစုပေါင်း ကုန်ကျစရိတ်နှင့် လေ့ကျင့်ခန်းမိနစ်ကို Dynamic တွက်ချက်ပြသနိုင်ပါသည်
-    // နမူနာအနေဖြင့် အသေပြသထားခြင်းဖြစ်ပြီး၊ Database မှတစ်ဆင့် Sum လုပ်နိုင်ပါသည်
-    totalExpenseEl.innerText = "၄၅,၀၀၀"; 
-    totalExerciseTimeEl.innerText = "၃၅";
+    // Safety check: Element များ ရှိမရှိ စစ်ဆေးပြီးမှ တန်ဖိုးထည့်ရန်
+    if (totalExpenseEl) totalExpenseEl.innerText = "0"; 
+    if (totalExerciseTimeEl) totalExerciseTimeEl.innerText = "0";
 }
