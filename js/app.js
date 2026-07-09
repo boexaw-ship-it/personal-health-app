@@ -7,6 +7,12 @@ const medicineGrid = document.getElementById('medicine-grid');
 const totalExpenseEl = document.getElementById('total-expense');
 const totalExerciseTimeEl = document.getElementById('total-exercise-time');
 
+// 🏃 Health Log DOM Elements
+const exerciseList = document.getElementById('exercise-list');
+const clinicList = document.getElementById('clinic-list');
+const btnAddExercise = document.getElementById('btn-add-exercise');
+const btnAddClinic = document.getElementById('btn-add-clinic');
+
 /* ==========================================================================
    1. Initialize App & Tab Navigation
    ========================================================================== */
@@ -14,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initTabs();
     initCalendar();
     loadDashboardData();
+    initLogButtons(); // ခလုတ်များ အလုပ်လုပ်ရန် စတင်နှိုးဆော်ခြင်း
 });
 
 function initTabs() {
@@ -63,18 +70,22 @@ async function loadDashboardData() {
     try {
         if (typeof dbFetchMedicines === 'function') {
             appMedicines = await dbFetchMedicines();
-            console.log("Supabase မှ ရလာသော ဒေတာများ:", appMedicines); // Debug စစ်ရန်
-        } else {
-            appMedicines = [];
+        }
+        
+        // ကျန်းမာရေး မှတ်တမ်းများကိုပါ တစ်ခါတည်း ဆွဲယူရန်
+        if (typeof dbFetchHealthLogs === 'function') {
+            const exercises = await dbFetchHealthLogs('exercises');
+            const clinicVisits = await dbFetchHealthLogs('clinic_visits');
+            renderHealthLogs(exercises, 'exercises');
+            renderHealthLogs(clinicVisits, 'clinic_visits');
+            calculateSummary(exercises, clinicVisits);
         }
     } catch (error) {
         console.error("Data loading error:", error);
-        appMedicines = [];
     }
     
     if (loadingEl) loadingEl.classList.add('hidden');
     renderMedicines(appMedicines);
-    calculateSummary();
 }
 
 function renderMedicines(medicines) {
@@ -87,18 +98,15 @@ function renderMedicines(medicines) {
     }
     
     medicines.forEach(med => {
-        // 💡 FIX: ဒေတာဘေ့စ်ထဲတွင် အမည်မရှိပါက default 'Unknown Medicine' ပြရန်
         const medName = med.name || 'Unknown Medicine';
         const medBrand = med.brand || 'General';
-        
-        // 💡 FIX: ဒေတာဘေ့စ်မှ id မပါလာပါက crash မဖြစ်စေရန် fallback လုပ်ခြင်း
         const medId = med.id || 0;
         
         const box = med.box_count || 0;
         const card = med.card_count || 0;
         const unit = med.unit_count || 0;
         const isOut = (box + card + unit) === 0;
-        const cardClass = isOut ? 'med-card out-of-stock shadow-soft' : 'med-card shadow-soft'; /* */
+        const cardClass = isOut ? 'med-card out-of-stock shadow-soft' : 'med-card shadow-soft';
         const imgUrl = med.image_url || 'assets/images/placeholder.png';
         
         const cardHtml = `
@@ -142,7 +150,7 @@ function renderMedicines(medicines) {
 }
 
 async function changeStock(id, field, currentVal, step) {
-    if (id === 0) return; // ID မှားနေပါက ဆက်မလုပ်ရန် တားဆီးခြင်း
+    if (id === 0) return;
     if (typeof dbUpdateStock === 'function') {
         const newVal = currentVal + step;
         const success = await dbUpdateStock(id, field, newVal);
@@ -150,7 +158,69 @@ async function changeStock(id, field, currentVal, step) {
     }
 }
 
-function calculateSummary() {
-    if (totalExpenseEl) totalExpenseEl.innerText = "0"; 
-    if (totalExerciseTimeEl) totalExerciseTimeEl.innerText = "0";
+/* ==========================================================================
+   4. 🏃 ကျန်းမာရေး မှတ်တမ်းများ ထည့်သွင်းခြင်းနှင့် ဖော်ပြခြင်းစနစ်
+   ========================================================================== */
+function initLogButtons() {
+    // လေ့ကျင့်ခန်း ခလုတ် နှိပ်လိုက်လျှင်
+    if (btnAddExercise) {
+        btnAddExercise.addEventListener('click', async () => {
+            const title = prompt("ပြုလုပ်ခဲ့သည့် လေ့ကျင့်ခန်း အမည် ရိုက်ထည့်ပါ (ဥပမာ - လမ်းလျှောက်ခြင်း):");
+            const duration = prompt("ကြာမြင့်ချိန် မိနစ် (ဥပမာ - 30):");
+            
+            if (title && duration && typeof supabaseClient !== 'undefined') {
+                await supabaseClient.from('exercises').insert([{ title, duration: parseInt(duration) }]);
+                loadDashboardData();
+            }
+        });
+    }
+
+    // ဆေးခန်းပြသမှုမှတ်တမ်း ခလုတ် နှိပ်လိုက်လျှင်
+    if (btnAddClinic) {
+        btnAddClinic.addEventListener('click', async () => {
+            const title = prompt("ဆေးခန်း သို့မဟုတ် ရောဂါအမည် (ဥပမာ - သွားကိုက်လို့):");
+            const cost = prompt("ကုန်ကျစရိတ် ကျပ်ငွေ (ဥပမာ - 15000):");
+            
+            if (title && cost && typeof supabaseClient !== 'undefined') {
+                await supabaseClient.from('clinic_visits').insert([{ title, cost: parseFloat(cost) }]);
+                loadDashboardData();
+            }
+        });
+    }
 }
+
+function renderHealthLogs(logs, type) {
+    const listEl = type === 'exercises' ? exerciseList : clinicList;
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    
+    if (!logs || logs.length === 0) {
+        listEl.innerHTML = `<li class="log-item" style="color:gray;">မှတ်တမ်း မရှိသေးပါဗျာ</li>`;
+        return;
+    }
+    
+    logs.forEach(log => {
+        const date = new Date(log.created_at).toLocaleDateString('my-MM', {hour: '2-digit', minute:'2-digit'});
+        let html = '';
+        if (type === 'exercises') {
+            html = `<li class="log-item"><span>🏃 ${log.title}</span><strong>${log.duration || 0} မိနစ်</strong></li>`;
+        } else {
+            html = `<li class="log-item"><span>🏥 ${log.title}</span><strong>${log.cost || 0} ကျပ်</strong></li>`;
+        }
+        listEl.insertAdjacentHTML('beforeend', html);
+    });
+}
+
+function calculateSummary(exercises = [], clinicVisits = []) {
+    // စုစုပေါင်း စရိတ်တွက်ရန်
+    if (totalExpenseEl) {
+        const totalCost = clinicVisits.reduce((sum, visit) => sum + (parseFloat(visit.cost) || 0), 0);
+        totalExpenseEl.innerText = totalCost.toLocaleString();
+    }
+    // စုစုပေါင်း လေ့ကျင့်ခန်းအချိန်တွက်ရန်
+    if (totalExerciseTimeEl) {
+        const totalTime = exercises.reduce((sum, ex) => sum + (parseInt(ex.duration) || 0), 0);
+        totalExerciseTimeEl.innerText = totalTime.toLocaleString();
+    }
+}
+
