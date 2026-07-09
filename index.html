@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/style.css">
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.43.4/supabase.js"></script>
 </head>
 <body>
 
@@ -30,8 +30,7 @@
     </header>
 
     <section class="calendar-section container">
-        <div class="calendar-strip" id="calendar-strip">
-            </div>
+        <div class="calendar-strip" id="calendar-strip"></div>
     </section>
 
     <section class="summary-section container">
@@ -58,8 +57,7 @@
         </div>
 
         <div id="medicine-view" class="app-view">
-            <div class="medicine-grid" id="medicine-grid">
-                </div>
+            <div class="medicine-grid" id="medicine-grid"></div>
         </div>
 
         <div id="health-log-view" class="app-view hidden">
@@ -67,19 +65,17 @@
                 <div class="log-card exercise-bg shadow-soft">
                     <div class="log-card-header">
                         <h2>🏋️ Home Exercise</h2>
-                        <button class="btn-add-log" id="btn-add-exercise" aria-label="Add Exercise Record">+</button>
+                        <button class="btn-add-log" id="btn-add-exercise" aria-label="Add Exercise">+</button>
                     </div>
-                    <ul class="log-list" id="exercise-list">
-                        </ul>
+                    <ul class="log-list" id="exercise-list"></ul>
                 </div>
 
                 <div class="log-card clinic-bg shadow-soft">
                     <div class="log-card-header">
                         <h2>🏥 ဆေးခန်းပြသမှုမှတ်တမ်း</h2>
-                        <button class="btn-add-log" id="btn-add-clinic" aria-label="Add Clinic Visit Record">+</button>
+                        <button class="btn-add-log" id="btn-add-clinic" aria-label="Add Clinic Visit">+</button>
                     </div>
-                    <ul class="log-list" id="clinic-list">
-                        </ul>
+                    <ul class="log-list" id="clinic-list"></ul>
                 </div>
             </div>
         </div>
