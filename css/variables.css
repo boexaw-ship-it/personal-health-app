@@ -1,0 +1,23 @@
+/* UI Design Knowledge Pack Core Variables */
+:root {
+    /* Color Palette */
+    --primary: #2563EB;        /* Royal Blue (ခေတ်မှီဆန်းသစ်သော ပင်မအရောင်) */
+    --success: #22C55E;        /* Soft Green (လက်ကျန်ရှိ ဆေးဝါး/လေ့ကျင့်ခန်း) */
+    --warning: #F59E0B;        /* Amber (လက်ကျန်နည်းနေသော ဆေးဝါး) */
+    --error: #EF4444;          /* Soft Red (ပြတ်လပ်ဆေးဝါး/ဆေးခန်းစရိတ်) */
+    
+    /* Neutral Grays */
+    --bg-main: #FFFFFF;        /* အမြင်ရှင်းတောက်စေမယ့် ပင်မနောက်ခံဖြူစင်မှု */
+    --bg-surface: #F1F5F9;     /* ကတ်ပြားများအတွက် မီးခိုးနုရောင်အေးအေး */
+    --text-main: #0F172A;      /* စာသားအနက်ရောင် (High Contrast) */
+    --text-muted: #64748B;     /* ဖတ်ရလွယ်ကူသော စာသားအမှိန် */
+    --border: #E2E8F0;         /* လိုင်းဖျော့လေးများ */
+    
+    /* Layout Rules */
+    --grid-8: 8px;             /* 8px Spacing Grid */
+    --radius-md: 12px;         /* အလတ်စား အနားလုံးမှု */
+    --radius-lg: 20px;         /* ကတ်ပြားများအတွက် အနားလုံးမှု */
+    
+    /* Premium Soft Shadow */
+    --shadow-soft: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+}

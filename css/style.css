@@ -1,1 +1,373 @@
+/* ==========================================================================
+   1. Reset & Base Styles (Heading Bold, Body Regular, Line-height 1.5-1.7)
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Mobile Touch Highlight ဖယ်ရှားရန် */
+}
 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.6; /* UI Knowledge Pack: Line-height 1.5–1.7 */
+    padding-bottom: 100px; /* အောက်ခြေ Tab Bar အတွက် နေရာချန်ရန် */
+}
+
+.container {
+    width: 100%;
+    max-width: 600px; /* Mobile-first Layout ဖြစ်၍ ဖုန်း screen ကို အဓိကမူတည် */
+    margin: 0 auto;
+    padding: 0 calc(var(--grid-8) * 2);
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================================================
+   2. Header Section
+   ========================================================================== */
+.main-header {
+    padding: calc(var(--grid-8) * 3) 0;
+    background-color: var(--bg-main);
+}
+
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700; /* Heading Bold */
+    color: var(--primary);
+    letter-spacing: -0.5px;
+}
+
+.main-header .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.profile-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--bg-surface);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ==========================================================================
+   3. Mini Weekly Calendar Widget 📆
+   ========================================================================== */
+.calendar-section {
+    margin-bottom: calc(var(--grid-8) * 3);
+}
+
+.calendar-strip {
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--bg-surface);
+    padding: calc(var(--grid-8) * 1.5);
+    border-radius: var(--radius-md);
+}
+
+.calendar-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--grid-8) calc(var(--grid-8) * 1.5);
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.calendar-day.active {
+    background-color: var(--primary);
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.calendar-day span:last-child {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* ==========================================================================
+   4. Mini Dashboard/Summary Section
+   ========================================================================== */
+.summary-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--grid-8) * 2);
+    margin-bottom: calc(var(--grid-8) * 4);
+}
+
+.summary-card {
+    background-color: var(--bg-surface);
+    padding: calc(var(--grid-8) * 2); /* UI Knowledge Pack: Padding 16-24px */
+    border-radius: var(--radius-lg); /* UI Knowledge Pack: Rounded corners 12-20px */
+    display: flex;
+    align-items: center;
+    gap: calc(var(--grid-8) * 1.5);
+}
+
+.summary-card h3 {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.summary-card .count-text {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.card-icon {
+    font-size: 1.5rem;
+}
+
+/* ==========================================================================
+   5. Medicine Tracker Grid & Multi-Unit Cards (ဗူး/ကဒ်/လုံး)
+   ========================================================================== */
+.medicine-grid {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--grid-8) * 2);
+}
+
+.med-card {
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: calc(var(--grid-8) * 2.5);
+    display: flex;
+    gap: calc(var(--grid-8) * 2);
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+/* ဆေးဝါးပြတ်လပ်ပါက မှေးမှိန်သွားစေရန် */
+.med-card.out-of-stock {
+    opacity: 0.6;
+}
+
+.med-img-wrapper {
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background-color: #E2E8F0;
+    flex-shrink: 0;
+}
+
+.med-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.med-info {
+    flex-grow: 1;
+}
+
+.med-info h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.med-info .med-brand {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: calc(var(--grid-8) * 1.5);
+}
+
+/* Multi-unit layout (ဗူး/ကဒ်/လုံး) */
+.units-container {
+    display: flex;
+    gap: calc(var(--grid-8) * 1.5);
+    margin-bottom: calc(var(--grid-8) * 1.5);
+}
+
+.unit-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #FFFFFF;
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+/* Action Control Buttons (+ / -) */
+.controls-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--grid-8) * 1);
+}
+
+.btn-ctrl {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background-color: #FFFFFF;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.btn-ctrl:active {
+    background-color: var(--border);
+}
+
+/* ==========================================================================
+   6. Health Logs View (Exercise & Clinic Visits)
+   ========================================================================== */
+.log-sections-grid {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--grid-8) * 3);
+}
+
+.log-card {
+    border-radius: var(--radius-lg);
+    padding: calc(var(--grid-8) * 2.5);
+}
+
+/* High Contrast Accent Colors for Logs */
+.exercise-bg { background-color: rgba(34, 197, 94, 0.08); border-left: 5px solid var(--success); }
+.clinic-bg { background-color: rgba(37, 99, 235, 0.08); border-left: 5px solid var(--primary); }
+
+.log-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(var(--grid-8) * 2);
+}
+
+.log-card-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.btn-add-log {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--text-main);
+    color: #FFFFFF;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.log-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--grid-8);
+}
+
+.log-item {
+    background: #FFFFFF;
+    padding: calc(var(--grid-8) * 1.5);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.log-item .time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   7. Premium Floating Bottom Tab Bar Navigation
+   ========================================================================== */
+.bottom-tab-bar {
+    position: fixed;
+    bottom: calc(var(--grid-8) * 2);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 400px;
+    background-color: rgba(15, 23, 42, 0.95); /* Premium Dark Glassmorphism Look */
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: calc(var(--grid-8) * 1) calc(var(--grid-8) * 3);
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.tab-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #94A3B8;
+    cursor: pointer;
+    padding: var(--grid-8);
+    transition: color 0.2s ease;
+}
+
+.tab-item.active {
+    color: #FFFFFF;
+}
+
+.tab-icon {
+    font-size: 1.3rem;
+}
+
+.tab-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Loading State Animation */
+.loading-state {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-muted);
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    margin: 0 auto 12px auto;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
