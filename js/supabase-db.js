@@ -1,10 +1,16 @@
-// 💡 FIX: Variable နာမည်ကို 'dbClient' သို့မဟုတ် Library နာမည်အကြီး 'supabase.createClient' ပုံစံအတိုင်း တိကျအောင် ပြင်ဆင်ထားပါသည်။
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 💡 FIX: CDN မှ ပါဝင်လာသော 'supabase' Global Object ကို သေချာစွာ ညွှန်းဆိုပြီး Client တည်ဆောက်ခြင်း
+const { createClient } = window.supabase || {};
+const supabaseClient = createClient ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+if (!supabaseClient) {
+    console.error("Supabase SDK ကို ချိတ်ဆက်၍ မရပါသဖြင့်။ index.html ရှိ CDN ကို ပြန်စစ်ပါ။");
+}
 
 /**
- * 1. ဆေးဝါးများအားလုံးကို ဆွဲယူခြင်း
+ * 1. ဆေးဝါးများအားလုံးကို ဆွဲယူခြင်း (Read)
  */
 async function dbFetchMedicines() {
+    if (!supabaseClient) return [];
     try {
         let { data, error } = await supabaseClient
             .from('medicines')
@@ -17,16 +23,16 @@ async function dbFetchMedicines() {
         }
         return data || [];
     } catch (err) {
-        console.error("Network Error:", err);
+        console.error("Network Error during fetch:", err);
         return [];
     }
 }
 
 /**
- * 2. ဆေးအရေအတွက် (ဗူး/ကဒ်/လုံး) ကို Update လုပ်ခြင်း
+ * 2. ဆေးအရေအတွက် (ဗူး/ကဒ်/လုံး) ကို Update လုပ်ခြင်း (Update)
  */
 async function dbUpdateStock(id, field, newValue) {
-    if (newValue < 0) return false; // သုညအောက် လျှော့မရအောင် တားဆီးခြင်း
+    if (!supabaseClient || newValue < 0) return false;
     
     try {
         let { error } = await supabaseClient
@@ -40,16 +46,16 @@ async function dbUpdateStock(id, field, newValue) {
         }
         return true;
     } catch (err) {
-        console.error("Network Update Error:", err);
+        console.error("Network Error during update:", err);
         return false;
     }
 }
 
 /**
- * 3. ယနေ့ ကျန်းမာရေး/ဆေးခန်း မှတ်တမ်းများ ဆွဲယူခြင်း
+ * 3. ကျန်းမာရေး/ဆေးခန်း မှတ်တမ်းများ ဆွဲယူခြင်း (Read Logs)
  */
 async function dbFetchHealthLogs(type) {
-    // type parameter တွင် 'exercises' သို့မဟုတ် 'clinic_visits' ကို ထည့်သွင်းရမည်
+    if (!supabaseClient) return [];
     try {
         let { data, error } = await supabaseClient
             .from(type)
@@ -62,7 +68,7 @@ async function dbFetchHealthLogs(type) {
         }
         return data || [];
     } catch (err) {
-        console.error("Network Logs Error:", err);
+        console.error("Network Error during fetching logs:", err);
         return [];
     }
 }
